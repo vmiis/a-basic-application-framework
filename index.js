@@ -172,12 +172,12 @@ var vm_init=function(){
 	}
 	//--------------------------------------------------------
 	var last=function(){
-		$('head').append("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css'>");
+		$('head').append("<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'>");
         $('head').append("<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css'>");
         $('head').append("<link rel='stylesheet' href='https://ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/themes/redmond/jquery-ui.css'>");
         $('head').append("<link rel='stylesheet' href='https://www.w3schools.com/w3css/4/w3.css'>");
-        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js',function(){$vm.js_popper=1;});
-        $.getScript('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js',function(){$vm.js_bootstrap=1;});
+        $.getScript('https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js',function(){$vm.js_popper=1;});
+        $.getScript('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js',function(){$vm.js_bootstrap=1;});
 		$.getScript('https://ajax.aspnetcdn.com/ajax/jquery.ui/1.12.1/jquery-ui.min.js',function(){$vm.js_jquery_ui=1;});
 		$.getScript('https://apis.google.com/js/plusone.js');
         $.getScript('https://ajax.aspnetcdn.com/ajax/jquery.validate/1.14.0/jquery.validate.min.js');
@@ -185,11 +185,16 @@ var vm_init=function(){
 		$.getScript('https://www.gstatic.com/charts/loader.js',function(){
 			google.charts.load('current', {packages: ['corechart']});
 		});
+		//-------------------------------------
         $vm.module_list['_system_export_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/export_dialog_module.html'};
         $vm.load_module_by_name('_system_export_dialog_module','',{})
         //-------------------------------------
         $vm.module_list['_system_import_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/import_dialog_module.html'};
         $vm.load_module_by_name('_system_import_dialog_module','',{})
+		//-------------------------------------
+		$vm.module_list['uploading_file_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/uploading_file_dialog_module.html'};
+        $vm.load_module_by_name('_system_import_dialog_module','',{})
+		//-------------------------------------
 	}
 	//********************************************************
 	load_config_and_init();
