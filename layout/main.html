@@ -7,8 +7,14 @@ VmInclude:/layout/main.html.footer.html
 <script>$vm.comments=1;</script>
 <script main-layout-js>
 	function F__ID(){
+		//------------------------------------
 		var home_page_module='website_home';
         console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* start running code in main.html ************************");
+		//This is the place we can add background image to body (Asynchronous)
+		var $image1 = $("<img>");
+		$image1.on('load',(function(){ $('body').css("background", "url("+$(this).attr("src")+") no-repeat bottom center"); $('body').css("background-size", "cover");  }));
+		$image1.attr("src", "layout/main.html.background.jpg");
+		console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* background image is ready ************************");
 		//------------------------------------
 		var website_item_list_for_search=[]
 		//------------------------------------
@@ -39,11 +45,6 @@ VmInclude:/layout/main.html.footer.html
 		    }
 		};
 		//-----------------------------------------
-		//This is the place we can add background image to body (Asynchronous)
-		var $image1 = $("<img>");
-		$image1.on('load',(function(){ $('body').css("background", "url("+$(this).attr("src")+") no-repeat bottom center"); $('body').css("background-size", "cover");  }));
-		$image1.attr("src", "layout/main.html.background.jpg");
-		//------------------------------------
 		//over write vm alert
 		$vm.alert=function(msg){
 			$('#vm_alert_information div.modal-body').html( $('<div/>').html(msg).text() );
@@ -53,6 +54,113 @@ VmInclude:/layout/main.html.footer.html
             $('#vm_alert_information').modal('hide');
 		}
 		//------------------------------------
+		//load home module
+		var load_home_module=function(){
+            console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* loading home module... **************************")
+			var a=window.location.href.split('module=');
+			if(a.length!=2)	$vm.nav_load_module(home_page_module);
+			else{
+				var name=a[1].split('&')[0];
+				if(name.length>0){
+					if($vm.module_list[name]!=undefined){
+						$vm.nav_load_module(name);
+						return;
+					}
+				};
+				alert("The module "+name+" doesn't exist!");
+			}
+		}
+		//------------------------------------
+		var load_system_modules=function(){
+			//-------------------------------------
+	        $vm.module_list['_system_export_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/export_dialog_module.html'};
+	        $vm.load_module_by_name('_system_export_dialog_module','',{})
+	        //-------------------------------------
+	        $vm.module_list['_system_import_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/import_dialog_module.html'};
+	        $vm.load_module_by_name('_system_import_dialog_module','',{})
+			//-------------------------------------
+			$vm.module_list['uploading_file_dialog_module']={table_id:'',url:'__COMPONENT__/dialog/uploading_file_dialog_module.html'};
+	        $vm.load_module_by_name('_system_import_dialog_module','',{})
+			//-------------------------------------
+		}
+		//********************************************************
+		//add all modules to module list
+		var N=0,P=0;
+		//------------------------------------
+		var add_config_modules_to_module_list_and_start=function(url,text,prefix){
+			var config;
+			try{ config=JSON.parse(text);}
+			catch (e){ alert("Error in config file\n"+e); return; }
+			var modules=config.modules;
+			for (var property in modules) {
+			   	if($vm.module_list[prefix+property]==undefined){
+				   	$vm.module_list[prefix+property]=modules[property];
+					if($vm.module_list[prefix+property].prefix!=undefined) $vm.module_list[prefix+property].prefix=prefix+$vm.module_list[prefix+property].prefix;
+                    else $vm.module_list[prefix+property].prefix=prefix;
+					var nm=$vm.module_list[prefix+property]['name_for_search'];
+					if(nm!=""){
+						if(nm==undefined) nm=property;
+						website_item_list_for_search.push({label:nm,value:prefix+property})
+					}
+					var m_url=$vm.module_list[prefix+property].url;
+					if(m_url!=undefined) m_url=$vm.url(m_url);
+					$vm.module_list[prefix+property].url=url.split('|')[0]+"/"+m_url;
+                    if(m_url!=undefined && (m_url.substring(0,7)=="http://" || m_url.substring(0,8)=="https://") ) $vm.module_list[prefix+property].url=m_url;
+			   	}
+			}
+			N--;P++;
+			if(P==1){
+				$('#vm_system_info').text((new Date().getTime()-$vm.start_time).toString()+"ms")
+				console.log((new Date().getTime()-$vm.start_time).toString()+"---"+N+"  "+P)
+				$vm.search_list=1;
+				load_home_module();
+				load_system_modules();
+			}
+			if(N==0){
+				console.log((new Date().getTime()-$vm.start_time).toString()+"---"+N+"  "+P)
+			}
+		}
+		//------------------------------------
+		var process_config_file=function(url,prefix){
+			$.get(url.replace('|','/')+'?_='+$vm.ver[1]+$vm.reload,function(data){
+				localStorage.setItem(url+"_txt",data);
+				localStorage.setItem(url+"_ver",$vm.ver[1]);
+				add_config_modules_to_module_list_and_start(url,data,prefix);
+			},'text').fail(function() {
+				console.log("The configuration file ("+url.replace('|','/')+") doesn't exist!")
+			});
+		}
+		//------------------------------------
+		setTimeout(function (){
+			//read all module's info from json files
+			var panels=$vm.app_config.panels;
+			for (var property in panels){
+				N=N+panels[property].modules.length;
+			}
+			for (var property in panels){
+				$vm.module_list[property]={"url":panels[property].url}
+				var prefix=property+"_";
+				$vm.module_list[property].prefix=prefix;
+				var json_files=panels[property].modules;
+				for(var i=0;i<json_files.length;i++){
+					var url=$vm.url(json_files[i]);
+	                if(json_files[i].indexOf('https://')==-1){
+	                    if(json_files[i].indexOf('|')==-1)   url=$vm.hosting_path+"|"+url;
+	                    else                                 url=$vm.hosting_path+"/"+url;
+	                }
+					var ver=localStorage.getItem(url+"_ver");
+					var txt=localStorage.getItem(url+"_txt");
+					if(ver!=$vm.ver[1] || txt===null || $vm.debug===true || $vm.reload!=''){
+						process_config_file(url,prefix);
+					}
+					else{
+	                    add_config_modules_to_module_list_and_start(url,txt,prefix);
+	                }
+				}
+			}
+		},100);
+		//********************************************************
+		//set header available
 		var set_module_search=function(){
 			$("#vm_system_search").autocomplete({
 				minLength:0,
@@ -72,96 +180,13 @@ VmInclude:/layout/main.html.footer.html
 			$("#vm_system_search").focus(function(){$("#vm_system_search").autocomplete("search","");});
 		}
 		//------------------------------------
-		var load_home_module=function(){
-            console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"*********************** loading home module... **************************")
-			var a=window.location.href.split('module=');
-			if(a.length!=2)	$vm.nav_load_module(home_page_module);
-			else{
-				var name=a[1].split('&')[0];
-				if(name.length>0){
-					if($vm.module_list[name]!=undefined){
-						$vm.nav_load_module(name);
-						return;
-					}
-				};
-				alert("The module "+name+" doesn't exist!");
-			}
-		}
-		//********************************************************
-		var N=0;
-		//------------------------------------
-		var add_config_modules_to_module_list_and_start=function(url,text,prefix){
-			var config;
-			try{ config=JSON.parse(text);}
-			catch (e){ alert("Error in config file\n"+e); return; }
-			var modules=config.modules;
-			for (var property in modules) {
-			   	if($vm.module_list[prefix+property]==undefined){
-				   	$vm.module_list[prefix+property]=modules[property];
-					if($vm.module_list[prefix+property].prefix!=undefined) $vm.module_list[prefix+property].prefix=prefix+$vm.module_list[prefix+property].prefix;
-                    else $vm.module_list[prefix+property].prefix=prefix;
-					var nm=$vm.module_list[prefix+property]['name_for_search'];
-					if(nm!=""){
-						if(nm==undefined) nm=property;
-						website_item_list_for_search.push({label:nm,value:prefix+property})
-					}
-					var m_url=$vm.module_list[prefix+property].url;
-					$vm.module_list[prefix+property].url=url.split('|')[0]+"/"+m_url;
-                    if(m_url!=undefined && (m_url.substring(0,7)=="http://" || m_url.substring(0,8)=="https://") ) $vm.module_list[prefix+property].url=m_url;
-			   	}
-			}
-			N--;
-			if(N==0){
-				$vm.search_list=1;
-				load_home_module();
-			}
-		}
-		//------------------------------------
-		var process_config_file=function(url,prefix){
-			$.get(url.replace('|','/')+'?_='+$vm.ver[1]+$vm.reload,function(data){
-				localStorage.setItem(url+"_txt",data);
-				localStorage.setItem(url+"_ver",$vm.ver[1]);
-				add_config_modules_to_module_list_and_start(url,data,prefix);
-			},'text').fail(function() {
-				//alert( "The configuration file ("+url.replace('|','/')+") doesn't exist!" );
-				console.log("The configuration file ("+url.replace('|','/')+") doesn't exist!")
-			});
-		}
-		//------------------------------------
-		//read all module's info from json files
-		var panels=$vm.app_config.panels;
-		for (var property in panels){
-			var json_files=panels[property].modules;
-			N=N+json_files.length;
-		}
-		for (var property in panels){
-			$vm.module_list[property]={"url":panels[property].url}
-			var prefix=property+"_";
-			$vm.module_list[property].prefix=prefix;
-			var json_files=panels[property].modules;
-			for(var i=0;i<json_files.length;i++){
-				var url=$vm.url(json_files[i]);
-				//if(json_files[i].indexOf('https://')==-1) url=$vm.hosting_path+"|"+url;
-                if(json_files[i].indexOf('https://')==-1){
-                    if(json_files[i].indexOf('|')==-1)   url=$vm.hosting_path+"|"+url;
-                    else                                 url=$vm.hosting_path+"/"+url;
-                }
-				var ver=localStorage.getItem(url+"_ver");
-				var txt=localStorage.getItem(url+"_txt");
-				if(ver!=$vm.ver[1] || txt===null || $vm.debug===true || $vm.reload!=''){
-					process_config_file(url,prefix);
-				}
-				else{
-                    add_config_modules_to_module_list_and_start(url,txt,prefix);
-                }
-			}
-		}
-		//********************************************************
 		var search_loop=setInterval(function (){
-			if($vm.js_jquery_ui==1 && $vm.search_list==1){
+			if($vm['jquery-ui-min-js']==1 && $vm['popper-min-js']==1 && $vm.search_list==1){
 				clearInterval(search_loop);
 				set_module_search();
-                console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* search module is ready ************************");
+				$('#vm_system_menu').show();
+				$('#vm_system_search').show();
+				console.log((new Date().getTime()-$vm.start_time).toString()+"---"+"********************* menu bar is ready ************************");
 			}
 		},100);
 		//------------------------------------
@@ -189,6 +214,9 @@ VmInclude:/layout/main.html.footer.html
         from { margin-top:0; }
 		to {margin-top:-50%;}
 	}
+    .ui-widget-content{
+        background:#eff3dc!important;
+    }
     .ui-autocomplete.ui-menu{font-size:12px}
 	.ui-menu-item .ui-menu-item-wrapper:hover{
 		font-weight:normal;
