@@ -20,6 +20,7 @@
 		height:100%;
         overflow:auto;
 		animation: vm_module_fadein 1.0s, D__ID 3s;
+        padding-bottom:10%;
 	}
 	#page__ID{
 		height:100%;
@@ -28,7 +29,7 @@
 	}
 	.panel__ID{
 		color:#fff;
-		background: rgba(0, 0, 0, 0.0);
+		background: rgba(0, 0, 0, 0);
 		border-radius: 25px;
 		padding:10px;
 	}
@@ -36,4 +37,9 @@
 		from {padding-top: 300px;}
 		to {padding-top: 0px;}
 	}
+    @media screen and (max-width: 992px) {
+        #D__ID{
+            animation: vm_module_fadein 1.0s;
+        }
+    }
 </style>
