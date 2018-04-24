@@ -1,16 +1,16 @@
 <div id=header__ID>
-    <div id=vm_logo module=website_home>
+    <div id=vm_logo module=home>
         <span id=vm_logo_label_A>Business Portal</span><br>
         <span id=vm_logo_label_B>on-demand business applications</span>
     </div>
     <div id="vm_system_menu">
-        <a module=website_home _class="vm_active"><i class="fa fa-home"></i> Home</a>
-        <a module=website_link-1>Link 1</a>
+        <a module=home _class="vm_active"><i class="fa fa-home"></i> Home</a>
+        <a module=pages_link-1>Link 1</a>
         <div class="vm_dropdown">
             <button class="vm_dropbtn">Dropdown <i class="fa fa-caret-down"></i></button>
             <div class="vm_dropdown-content">
-                <a module=website_link-2>Link 2</a>
-                <a module=website_link-3>Link 3</a>
+                <a module=pages_link-2>Link 2</a>
+                <a module=pages_link-3>Link 3</a>
             </div>
         </div>
         <div class="vm_dropdown" id=signin__ID>
@@ -24,10 +24,11 @@
         <a id=signout__ID style="display:none" onclick=$vm.nav_signout()><i class="fa fa-user"></i> Sign Out</a>
         <input id=vm_system_search  type="text" placeholder="Search modules..." />
     </div>
-    <span module=website_home id=m_title>Business Portal</span>
+    <span module=home id=m_title>Business Portal</span>
 	<a toggle id="vm_icon" onclick="vm_toggle()"><i class="fa fa-bars"></i></a>
 </div>
 <script>
+	//---------------------------------------------
     function vm_toggle() {
         var x = document.getElementById("vm_system_menu");
         if(x.className==='') x.className="responsive";
@@ -46,17 +47,9 @@
         if(d.css('display')=='block') d.css('display','none');
         else d.css('display','block');
     })
-    $(".vm_dropdown-content").mouseleave(function () {
-        $(this).hide();
-    })
-    $('#m_title').on('click',function(){
-        var module=$(this).attr('module');
-        $vm.nav_load_module(module);
-    })
-    $('#vm_logo').on('click',function(){
-        var module=$(this).attr('module');
-        $vm.nav_load_module(module);
-    })
+    $(".vm_dropdown-content").mouseleave(function (){  $(this).hide();  })
+    $('#m_title').on('click',function(){   var module=$(this).attr('module');   $vm.nav_load_module(module);    })
+    $('#vm_logo').on('click',function(){   var module=$(this).attr('module');   $vm.nav_load_module(module);    })
     //---------------------------------------------
     var init_loop=setInterval(function (){
         console.log('init_loop...')
@@ -84,13 +77,8 @@
     }
     //---------------------------------------------
     if(window.location.hostname!='127.0.0.1'){
-
         $vm.google_signin_setup('175539446682-tvqlkse9j0mt79fk70uetoq30bpnrboa.apps.googleusercontent.com','google__ID',show_user);
         $vm.facebook_signin_setup('360182794393427','facebook__ID',show_user);
-    }
-    //---------------------------------------------
-    if(window.innerWidth <= 800 && window.innerHeight <= 600) {
-        //$('#form__ID').parent().prepend($('#form__ID'));
     }
     //---------------------------------------------
 </script>
@@ -123,14 +111,12 @@
       font-size: 14px;
       cursor:pointer;
     }
-
+	#vm_icon {
+      display: none;
+    }
     .vm_active {
       background-color: #4CAF50;
       color: white;
-    }
-
-    #vm_icon {
-      display: none;
     }
     .vm_dropdown {
         float: left;
@@ -154,10 +140,11 @@
         box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
         z-index: 1;
     }
-    .vm_dropdown-content a {
+	.vm_dropdown-content a {
         float: none;
-        color: black;
-        padding: 5px 16px;
+        font-size: 14px;
+        color: #666!important;
+        padding: 3px 16px;
         text-decoration: none;
         display: block;
         text-align: left;
